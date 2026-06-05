@@ -1,8 +1,11 @@
 package main
 
 import (
+	"log"
 	"net/http"
 	"os"
+
+	"scheduler/pkg/db"
 )
 
 func main() {
@@ -13,6 +16,16 @@ func main() {
 		port = "7540"
 	}
 
+	dbFile := os.Getenv("TODO_DBFILE")
+	if dbFile == "" {
+		dbFile = "scheduler.db"
+	}
+
+	err := db.Init(dbFile)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	http.Handle("/", http.FileServer(http.Dir(webDir)))
-	http.ListenAndServe(":"+port, nil)
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
