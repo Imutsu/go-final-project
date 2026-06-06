@@ -58,8 +58,47 @@ func NextDate(now time.Time, dstart string, repeat string) (string, error) {
 			}
 		}
 
+	case "w":
+		return nextWeekDate(now, date, parts)
+
+	case "m":
+		return "", errors.New("unsupported month format")
+
 	default:
 		return "", errors.New("unsupported repeat format")
+	}
+}
+
+func nextWeekDate(now time.Time, date time.Time, parts []string) (string, error) {
+	if len(parts) != 2 {
+		return "", errors.New("invalid week format")
+	}
+
+	var days [8]bool
+
+	items := strings.Split(parts[1], ",")
+
+	for _, item := range items {
+		n, err := strconv.Atoi(item)
+		if err != nil || n < 1 || n > 7 {
+			return "", errors.New("invalid weekday")
+		}
+
+		days[n] = true
+	}
+
+	for {
+		date = date.AddDate(0, 0, 1)
+
+		wd := int(date.Weekday())
+
+		if wd == 0 {
+			wd = 7
+		}
+
+		if days[wd] && afterNow(date, now) {
+			return date.Format(DateFormat), nil
+		}
 	}
 }
 
