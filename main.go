@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 
+	"scheduler/pkg/api"
 	"scheduler/pkg/db"
 )
 
@@ -25,6 +26,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	api.Init()
 
 	http.Handle("/", http.FileServer(http.Dir(webDir)))
 	log.Fatal(http.ListenAndServe(":"+port, nil))
