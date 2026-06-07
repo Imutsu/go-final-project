@@ -12,9 +12,19 @@ func Init() {
 
 func taskHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
+
 	case http.MethodPost:
 		addTaskHandler(w, r)
+
+	case http.MethodGet:
+		getTaskHandler(w, r)
+
+	case http.MethodPut:
+		updateTaskHandler(w, r)
+
 	default:
-		writeJSON(w, map[string]string{"error": "Метод не поддерживается"})
+		writeJSON(w, map[string]string{
+			"error": "Метод не поддерживается",
+		})
 	}
 }

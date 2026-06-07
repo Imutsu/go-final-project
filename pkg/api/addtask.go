@@ -45,6 +45,56 @@ func addTaskHandler(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, map[string]string{"id": strconv.FormatInt(id, 10)})
 }
 
+func getTaskHandler(w http.ResponseWriter, r *http.Request) {
+	id := r.URL.Query().Get("id")
+	if id == "" {
+		writeJSON(w, map[string]string{"error": "Не указан идентификатор"})
+		return
+	}
+
+	task, err := db.GetTask(id)
+	if err != nil {
+		writeJSON(w, map[string]string{"error": "Задача не найдена"})
+		return
+	}
+
+	writeJSON(w, task)
+}
+
+func updateTaskHandler(w http.ResponseWriter, r *http.Request) {
+	var task db.Task
+
+	err := json.NewDecoder(r.Body).Decode(&task)
+	if err != nil {
+		writeJSON(w, map[string]string{"error": err.Error()})
+		return
+	}
+
+	if task.ID == "" {
+		writeJSON(w, map[string]string{"error": "Не указан идентификатор"})
+		return
+	}
+
+	if task.Title == "" {
+		writeJSON(w, map[string]string{"error": "Не указан заголовок задачи"})
+		return
+	}
+
+	err = checkDate(&task)
+	if err != nil {
+		writeJSON(w, map[string]string{"error": err.Error()})
+		return
+	}
+
+	err = db.UpdateTask(&task)
+	if err != nil {
+		writeJSON(w, map[string]string{"error": "Задача не найдена"})
+		return
+	}
+
+	writeJSON(w, map[string]string{})
+}
+
 func checkDate(task *db.Task) error {
 	now := time.Now()
 
