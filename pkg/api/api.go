@@ -9,9 +9,11 @@ import (
 
 func Init() {
 	http.HandleFunc("/api/nextdate", nextDayHandler)
-	http.HandleFunc("/api/task", taskHandler)
-	http.HandleFunc("/api/tasks", tasksHandler)
-	http.HandleFunc("/api/task/done", doneHandler)
+	http.HandleFunc("/api/signin", SigninHandler)
+
+	http.HandleFunc("/api/task", Auth(taskHandler))
+	http.HandleFunc("/api/tasks", Auth(tasksHandler))
+	http.HandleFunc("/api/task/done", Auth(doneHandler))
 }
 
 func taskHandler(w http.ResponseWriter, r *http.Request) {
