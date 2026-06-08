@@ -103,6 +103,11 @@ func nextWeekDate(now time.Time, date time.Time, parts []string) (string, error)
 }
 
 func nextDayHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
 	nowStr := r.FormValue("now")
 	date := r.FormValue("date")
 	repeat := r.FormValue("repeat")

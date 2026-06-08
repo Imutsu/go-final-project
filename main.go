@@ -26,6 +26,10 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer db.DB.Close()
+
+	password := os.Getenv("TODO_PASSWORD")
+	api.SetPassword(password)
 
 	api.Init()
 

@@ -12,7 +12,12 @@ import (
 const dateFormat = "20060102"
 
 func writeJSON(w http.ResponseWriter, data any) {
+	writeJSONStatus(w, http.StatusOK, data)
+}
+
+func writeJSONStatus(w http.ResponseWriter, status int, data any) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(status)
 	json.NewEncoder(w).Encode(data)
 }
 
@@ -21,7 +26,7 @@ func addTaskHandler(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&task)
 	if err != nil {
-		writeJSON(w, map[string]string{"error": err.Error()})
+		writeJSONStatus(w, http.StatusBadRequest, map[string]string{"error": err.Error()})
 		return
 	}
 

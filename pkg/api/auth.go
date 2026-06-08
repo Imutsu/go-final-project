@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -18,6 +17,12 @@ type SigninRequest struct {
 type SigninResponse struct {
 	Token string `json:"token,omitempty"`
 	Error string `json:"error,omitempty"`
+}
+
+var todoPassword string
+
+func SetPassword(pass string) {
+	todoPassword = pass
 }
 
 func hashPassword(pass string) string {
@@ -69,16 +74,14 @@ func SigninHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pass := os.Getenv("TODO_PASSWORD")
-
-	if req.Password != pass {
+	if req.Password != todoPassword {
 		json.NewEncoder(w).Encode(SigninResponse{
 			Error: "Неверный пароль",
 		})
 		return
 	}
 
-	token, err := createToken(pass)
+	token, err := createToken(todoPassword)
 	if err != nil {
 		json.NewEncoder(w).Encode(SigninResponse{
 			Error: err.Error(),
@@ -93,16 +96,15 @@ func SigninHandler(w http.ResponseWriter, r *http.Request) {
 
 func Auth(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		pass := os.Getenv("TODO_PASSWORD")
 
-		if pass != "" {
+		if todoPassword != "" {
 			cookie, err := r.Cookie("token")
 			if err != nil {
 				http.Error(w, "Authentication required", http.StatusUnauthorized)
 				return
 			}
 
-			if !validateToken(cookie.Value, pass) {
+			if !validateToken(cookie.Value, todoPassword) {
 				http.Error(w, "Authentication required", http.StatusUnauthorized)
 				return
 			}

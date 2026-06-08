@@ -6,6 +6,11 @@ import (
 	"time"
 )
 
+const (
+	DateFormat       = "20060102"
+	SearchDateFormat = "02.01.2006"
+)
+
 type Task struct {
 	ID      string `json:"id"`
 	Date    string `json:"date"`
@@ -42,7 +47,7 @@ func Tasks(limit int, search string) ([]*Task, error) {
 			LIMIT ?
 		`, limit)
 
-	} else if date, errDate := time.Parse("02.01.2006", search); errDate == nil {
+	} else if date, errDate := time.Parse(SearchDateFormat, search); errDate == nil {
 
 		rows, err = DB.Query(`
 			SELECT id, date, title, comment, repeat
@@ -50,7 +55,7 @@ func Tasks(limit int, search string) ([]*Task, error) {
 			WHERE date = ?
 			ORDER BY date
 			LIMIT ?
-		`, date.Format("20060102"), limit)
+		`, date.Format(DateFormat), limit)
 
 	} else {
 

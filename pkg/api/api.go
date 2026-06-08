@@ -44,13 +44,16 @@ func taskHandler(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, map[string]string{})
 
 	default:
-		writeJSON(w, map[string]string{
-			"error": "Метод не поддерживается",
-		})
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 	}
 }
 
 func doneHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
 	id := r.URL.Query().Get("id")
 	if id == "" {
 		writeJSON(w, map[string]string{"error": "не указан id"})
