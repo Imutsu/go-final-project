@@ -34,5 +34,8 @@ func main() {
 	api.Init()
 
 	http.Handle("/", http.FileServer(http.Dir(webDir)))
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	err = http.ListenAndServe(":"+port, nil)
+	if err != nil {
+		log.Println(err)
+	}
 }

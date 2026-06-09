@@ -9,8 +9,6 @@ import (
 	"scheduler/pkg/db"
 )
 
-const dateFormat = "20060102"
-
 func writeJSON(w http.ResponseWriter, data any) {
 	writeJSONStatus(w, http.StatusOK, data)
 }
@@ -31,19 +29,19 @@ func addTaskHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if task.Title == "" {
-		writeJSON(w, map[string]string{"error": "Не указан заголовок задачи"})
+		writeJSONStatus(w, http.StatusBadRequest, map[string]string{"error": "Не указан заголовок задачи"})
 		return
 	}
 
 	err = checkDate(&task)
 	if err != nil {
-		writeJSON(w, map[string]string{"error": err.Error()})
+		writeJSONStatus(w, http.StatusBadRequest, map[string]string{"error": err.Error()})
 		return
 	}
 
 	id, err := db.AddTask(&task)
 	if err != nil {
-		writeJSON(w, map[string]string{"error": err.Error()})
+		writeJSONStatus(w, http.StatusBadRequest, map[string]string{"error": err.Error()})
 		return
 	}
 
@@ -53,13 +51,13 @@ func addTaskHandler(w http.ResponseWriter, r *http.Request) {
 func getTaskHandler(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Query().Get("id")
 	if id == "" {
-		writeJSON(w, map[string]string{"error": "Не указан идентификатор"})
+		writeJSONStatus(w, http.StatusBadRequest, map[string]string{"error": "Не указан идентификатор"})
 		return
 	}
 
 	task, err := db.GetTask(id)
 	if err != nil {
-		writeJSON(w, map[string]string{"error": "Задача не найдена"})
+		writeJSONStatus(w, http.StatusBadRequest, map[string]string{"error": "Задача не найдена"})
 		return
 	}
 
@@ -71,29 +69,29 @@ func updateTaskHandler(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&task)
 	if err != nil {
-		writeJSON(w, map[string]string{"error": err.Error()})
+		writeJSONStatus(w, http.StatusBadRequest, map[string]string{"error": err.Error()})
 		return
 	}
 
 	if task.ID == "" {
-		writeJSON(w, map[string]string{"error": "Не указан идентификатор"})
+		writeJSONStatus(w, http.StatusBadRequest, map[string]string{"error": "Не указан идентификатор"})
 		return
 	}
 
 	if task.Title == "" {
-		writeJSON(w, map[string]string{"error": "Не указан заголовок задачи"})
+		writeJSONStatus(w, http.StatusBadRequest, map[string]string{"error": "Не указан заголовок задачи"})
 		return
 	}
 
 	err = checkDate(&task)
 	if err != nil {
-		writeJSON(w, map[string]string{"error": err.Error()})
+		writeJSONStatus(w, http.StatusBadRequest, map[string]string{"error": err.Error()})
 		return
 	}
 
 	err = db.UpdateTask(&task)
 	if err != nil {
-		writeJSON(w, map[string]string{"error": "Задача не найдена"})
+		writeJSONStatus(w, http.StatusBadRequest, map[string]string{"error": "Задача не найдена"})
 		return
 	}
 
@@ -104,10 +102,10 @@ func checkDate(task *db.Task) error {
 	now := time.Now()
 
 	if task.Date == "" {
-		task.Date = now.Format(dateFormat)
+		task.Date = now.Format(DateFormat)
 	}
 
-	t, err := time.Parse(dateFormat, task.Date)
+	t, err := time.Parse(DateFormat, task.Date)
 	if err != nil {
 		return err
 	}
@@ -123,7 +121,7 @@ func checkDate(task *db.Task) error {
 
 	if afterNow(now, t) {
 		if task.Repeat == "" {
-			task.Date = now.Format(dateFormat)
+			task.Date = now.Format(DateFormat)
 		} else {
 			task.Date = next
 		}
