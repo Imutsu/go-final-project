@@ -1,0 +1,41 @@
+package main
+
+import (
+	"log"
+	"net/http"
+	"os"
+
+	"scheduler/pkg/api"
+	"scheduler/pkg/db"
+)
+
+func main() {
+	webDir := "web"
+	port := os.Getenv("TODO_PORT")
+
+	if port == "" {
+		port = "7540"
+	}
+
+	dbFile := os.Getenv("TODO_DBFILE")
+	if dbFile == "" {
+		dbFile = "scheduler.db"
+	}
+
+	err := db.Init(dbFile)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.DB.Close()
+
+	password := os.Getenv("TODO_PASSWORD")
+	api.SetPassword(password)
+
+	api.Init()
+
+	http.Handle("/", http.FileServer(http.Dir(webDir)))
+	err = http.ListenAndServe(":"+port, nil)
+	if err != nil {
+		log.Println(err)
+	}
+}
